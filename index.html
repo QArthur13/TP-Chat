@@ -5,27 +5,41 @@
 
     <title>Chat</title>
 
+    <!--Je sais que j'ai installer avec NPM mais malheuresement je n'ai pas réussi à le faire marcher-->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css" integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l" crossorigin="anonymous">
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.min.js" integrity="sha384-+YQ4JLhjyBLPDQt//I+STsc9iw4uQqACwlvpslubQzn4u2UU2UFM80nGisd026JF" crossorigin="anonymous"></script>
+
+    <!-- Le style à été repris par le tutoriel de socket.io -->
     <style>
-        /* body { margin: 0; padding-bottom: 3rem; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        body { margin: 0; padding-bottom: 3rem; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
   
-        #form { background: rgba(0, 0, 0, 0.15); padding: 0.25rem; position: fixed; bottom: 0; left: 0; right: 0; display: flex; height: 3rem; box-sizing: border-box; backdrop-filter: blur(10px); }
+        /* #form { background: rgba(0, 0, 0, 0.15); padding: 0.25rem; position: fixed; bottom: 0; left: 0; right: 0; display: flex; height: 3rem; box-sizing: border-box; backdrop-filter: blur(10px); }
         #input { border: none; padding: 0 1rem; flex-grow: 1; border-radius: 2rem; margin: 0.25rem; }
         #input:focus { outline: none; }
-        #form > button { background: #333; border: none; padding: 0 1rem; margin: 0.25rem; border-radius: 3px; outline: none; color: #fff; }
+        #form > button { background: #333; border: none; padding: 0 1rem; margin: 0.25rem; border-radius: 3px; outline: none; color: #fff; } */
   
         #messages { list-style-type: none; margin: 0; padding: 0; }
         #messages > li { padding: 0.5rem 1rem; }
-        #messages > li:nth-child(odd) { background: #efefef; } */
+        #messages > li:nth-child(odd) { background: #efefef; }
     </style>
 </head>
 <body>
     <ul id="messages"></ul>
     <form id="form" action="">
-        <label for="pseudo">Pseudo:</label>
-        <input id="pseudo" autocomplete="off" type="text" name="pseudo">
-        <label for="inputMessage">Message:</label>
-        <input id="inputMessage" autocomplete="off" type="text" name="inputMessage">
-        <button>Envoie</button>
+        <div class="form-row">
+            <div class="form-group col">
+                <label for="pseudo">Pseudo:</label>
+                <input class="form-control" id="pseudo" type="text" name="pseudo">
+            </div>
+            <div class="form-group col">
+                <label for="inputMessage">Message:</label>
+                <input class="form-control" id="inputMessage" autocomplete="off" type="text" name="inputMessage"    >
+            </div>
+        </div>
+        <button class="btn btn-primary">Envoie</button>
     </form>
     <script src="/socket.io/socket.io.js"></script>
     <script>
@@ -33,24 +47,28 @@
 
         let messages = document.getElementById('messages');
         let form = document.getElementById('form');
+        let pseudo = document.getElementById('pseudo');
         let input = document.getElementById('inputMessage');
 
         form.addEventListener('submit', function (e) {
             
             e.preventDefault();
 
-            if (input.value) {
+            //On vérifie que il y a bien des valeurs pour le pseudo et le message, puis on l'envoie au index.js
+            if (pseudo.value && input.value) {
                 
-                socket.emit('chat message', input.value);
+                socket.emit('chat message', pseudo.value, input.value);
+                pseudo.value = '';
                 input.value = '';
             }
         });
 
-        socket.on('chat message', function (msg) {
+        //Permet de voir le message de l'utilisateur.
+        socket.on('chat message', function (pseudo, msg) {
             
             let item = document.createElement('li');
             
-            item.textContent = msg;
+            item.textContent = pseudo + ': \n' + msg;
             messages.appendChild(item);
             window.scrollTo(0, document.body.scrollHeight);
         });

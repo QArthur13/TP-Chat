@@ -6,44 +6,36 @@ const url = 'mongodb://localhost:27017';
 const dbName = 'myproject';
 const client = new MongoClient(url);
 
+//On se connecte à MongoDB.
 client.connect(function(err) {
 
+    //On vérifie qu'on c'est bien connecter!
     console.log('Serveur connecter!');
   
+    //On récupère le nom de notre BDD
     const db = client.db(dbName);
 
-    /* function insertDocuments(db, msg, callback) {
-        // Get the documents collection
-        // On récupére le nom du table, si elle n'existe pas Mongo le créer.
-        const collection = db.collection('documents');
-        // On insère quelque documents
-        collection.insertMany([{ pseudo: "Arthur",  message: msg}, { pseudo: "Erosse", message: msg }], function(err, result) {
-          console.log('Insertion des messages!');
-          callback(result);
-        });
-    }; */
-
+    //Puis on insère les données.
     function insertDocument(db, pseudo, msg, callback) {
         
+        //On récupère la table de la BDD.
         const collection = db.collection('documents');
 
+        //Insertion des données.
         collection.insertOne({ pseudo: pseudo, message: msg}, function (err, result) {
             
+            //On vérifie si on a bien envoyé les messages.
             console.log('Insertion du message!');
             callback(result);
         });
     };
-
-    /* insertDocuments(db, function (toto) {
-
-        console.log(toto);
-    }); */
   
     app.get('/', (req, res) => {
     
         res.sendFile(__dirname + '/index.html');
     });
     
+    //Quand une personne se connecte.
     io.on('connection', (socket) => {
     
         console.log('Un utilisateur c_est connecter!');
@@ -51,19 +43,18 @@ client.connect(function(err) {
         /**
          * Lorsque qu'un message est envoyé, on l'insère à notre BDD.
          */
-        socket.on('chat message', msg => {
+        socket.on('chat message', (pseudo, msg) => {
     
-            io.emit('chat message', msg);
+            //On émets les pseudo et les messages, puis on les insères.
+            io.emit('chat message', pseudo, msg);
 
-            /* insertDocuments(db, msg, function (chat) {
+            insertDocument(db, pseudo, msg, function (chat) {
                 
-                //On regarde si l'acion c'est bien effectué.
-                console.log(chat)
-            }) */
-
-            insertDocument(db, )
+                console.log(chat);
+            });
         });
     
+        //Quand une personne se déconnecte.
         socket.on('disconnect', () => {
     
             console.log('Un utilisateur c_est deconnecter!');
